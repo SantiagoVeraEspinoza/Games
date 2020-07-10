@@ -18,14 +18,13 @@ private:
     int FieldWidth=60;
     int FieldHeight=100;
     int cont=0;
-    int Tetromino_Type=2;
+    int cont_2=0;
+    int Tetromino_Type=1;
     
     int const static Block_Size=4;
     
     struct Coord{
         float x,y;
-        int x1=x+Block_Size;
-        int y1=y+Block_Size;
     };
     
     struct Cubes{
@@ -36,13 +35,17 @@ private:
     vector <Cubes> Tetromino;
     vector <Cubes> Tetromino_Mesh;
     
+    
+    float Pos_X=ScreenWidth()-8;
+    float Pos_Y=28;
+    
 public:
     Juego(){}
     ~Juego(){}
     
     void DrawField(){
-        int BorderField_OOB_X = (ScreenWidth()-FieldWidth)/2;
-        int BorderField_OOB_Y = (ScreenHeight()-FieldHeight)/2;
+        int BorderField_OOB_X = ((ScreenWidth()-FieldWidth)/2)-2;
+        int BorderField_OOB_Y = ((ScreenHeight()-FieldHeight)/2)-2;
         
         int x1=BorderField_OOB_X;
         int y1=BorderField_OOB_Y;
@@ -63,102 +66,164 @@ public:
     }
     
     void Rotate_Tetromino(){
-        if(GetKey(VK_SPACE).bPressed){
+        int ID[8];
+        if(GetKey(VK_SPACE).bPressed and Tetromino_Type!=4 and Tetromino_Type!=1){
+            
                     for(int i=0; i<Tetromino[Tetromino_Type].Arr.size(); i++){
-                        int x=Tetromino[Tetromino_Type].Arr[i].x;
-                        int y=Tetromino[Tetromino_Type].Arr[i].y;
+                        int x=(Tetromino[Tetromino_Type].Arr[i].x/4);
+                        int y=(Tetromino[Tetromino_Type].Arr[i].y/4);
                         
-                        float cx=6, cy=6;
+                        ID[i]=3-y+(4*x);
                         
-                        float PM_AC_X=(x+cx)/2, PM_AC_Y=(y+cy)/2;
+                        y=(ID[i]/4);
+                        x=ID[i]-(4*y);
                         
-                        float m=-1*(pow(((y-cy)/(x-cx)),-1));
-                        
-                        float DM_AC=pow((pow(((pow((x-cx),2)+pow((y-cy),2))),0.5)/2),2);
-                        
-                        float PP_Y_INCOG=m;
-                        float PP_Y_INDEP=(m*PM_AC_X*-1)+PM_AC_Y;
-                        
-                        float a=1+pow(PP_Y_INCOG, 2);
-                        float b=((PM_AC_X*-2)+((PM_AC_Y-PP_Y_INDEP)*(-2*PP_Y_INCOG)));
-                        float c=(pow(PM_AC_X,2)+pow((PM_AC_Y-PP_Y_INDEP),2))-DM_AC;
-                        
-                        float x1=(((-1*b)+pow((pow(b,2)-(4*a*c)),0.5))/(2*a));
-                        float y1=((PP_Y_INCOG*x1)+PP_Y_INDEP);
-                        x1=x1+(x1-x);
-                        y1=y1+(y1-y);
-                        
-                        
-                        
-                        Tetromino[Tetromino_Type].Arr[i].x=round(x1);
-                        Tetromino[Tetromino_Type].Arr[i].y=round(y1);
-                        cout << x1 << "--------------------" << endl << Tetromino[Tetromino_Type].Arr[i].x << endl << Tetromino[Tetromino_Type].Arr[i].y << endl << endl;
+                        Tetromino[Tetromino_Type].Arr[i].x=x*4;
+                        Tetromino[Tetromino_Type].Arr[i].y=y*4;
+                        }
+        
+        }
+        else if (GetKey(VK_SPACE).bPressed and Tetromino_Type==1){
+            
+            if(cont_2==0){
+                for(int i=0; i<Tetromino[Tetromino_Type].Arr.size(); i++){
+                    int x=(Tetromino[Tetromino_Type].Arr[i].x/4);
+                    int y=(Tetromino[Tetromino_Type].Arr[i].y/4);
+                    ID[i]=3-y+(4*x);
+                    
+                    y=(ID[i]/4);
+                    x=ID[i]-(4*y);
+                    
+                    Tetromino[Tetromino_Type].Arr[i].x=x*4;
+                    Tetromino[Tetromino_Type].Arr[i].y=y*4;
+                }
+                cont_2=1;
+            }
+            else if(cont_2==1){
+                for(int i=0; i<Tetromino[Tetromino_Type].Arr.size(); i++){
+                    int x=(Tetromino[Tetromino_Type].Arr[i].x/4);
+                    int y=(Tetromino[Tetromino_Type].Arr[i].y/4);
+                    
+                    ID[i]=12+y-(x*4);
+                    
+                    y=(ID[i]/4);
+                    x=ID[i]-(4*y);
+                    
+                    Tetromino[Tetromino_Type].Arr[i].x=x*4;
+                    Tetromino[Tetromino_Type].Arr[i].y=y*4;
+                }
+                cont_2=0;
             }
         }
+    }
+    
+    bool DoesPieceFit(){
+        for (int i=0; i<Tetromino[Tetromino_Type].Arr.size(); i++){
+            if((Tetromino[Tetromino_Type].Arr[i].x+Pos_X)>=(((((ScreenWidth()-FieldWidth)/2)-2)+Block_Size)+FieldWidth-(2*Block_Size))-Block_Size)return false;
+        }
         
+        return true;
+    }
+    
+    bool DoesPieceFit2(){
+        for (int i=0; i<Tetromino[Tetromino_Type].Arr.size(); i++){
+            if((Tetromino[Tetromino_Type].Arr[i].x+Pos_X)<=(((ScreenWidth()-FieldWidth)/2)-2)+Block_Size) return false;
+        }
+        return true;
+    }
+    
+    bool DoesPieceFit3(){
+        for (int i=0; i<Tetromino[Tetromino_Type].Arr.size(); i++){
+            if((Tetromino[Tetromino_Type].Arr[i].y+Pos_Y)>=((((ScreenHeight()-FieldHeight)/2)-2)+FieldHeight)-(2*Block_Size)) return false;
+        }
+        return true;
+    }
+    
+    void MoveTetromino(){
+        if(GetKey(VK_RIGHT).bPressed and DoesPieceFit()){
+            Pos_X=Pos_X+Block_Size;
+            cout << "X= " << Pos_X << endl;
+        }
         
+        if(GetKey(VK_LEFT).bPressed and DoesPieceFit2()){
+            Pos_X=Pos_X-Block_Size;
+            cout << "X= " << Pos_X << endl;
+        }
+        
+        if(GetKey(VK_DOWN).bPressed and DoesPieceFit3()){
+            Pos_Y=Pos_Y+Block_Size;
+            cout << "Y= " << Pos_Y << endl;
+        }
     }
     
     void DrawTetromino(){
+        if(cont<1){
+            Tetromino.push_back({});
+            Tetromino.push_back({});
+            Tetromino.push_back({});
+            Tetromino.push_back({});
+            Tetromino.push_back({});
+            Tetromino.push_back({});
+            Tetromino.push_back({});
+            
+            
+            
+            Tetromino[0].Arr.push_back({8, 0});
+            Tetromino[0].Arr.push_back({8, 4});
+            Tetromino[0].Arr.push_back({12, 4});
+            Tetromino[0].Arr.push_back({8, 8});
+            Tetromino[0].Colour=FG_MAGENTA;
+            
+            Tetromino[1].Arr.push_back({0, 0});
+            Tetromino[1].Arr.push_back({4, 0});
+            Tetromino[1].Arr.push_back({8, 0});
+            Tetromino[1].Arr.push_back({12, 0});
+            Tetromino[1].Colour=FG_BLUE;
+            
+            Tetromino[2].Arr.push_back({0,0});
+            Tetromino[2].Arr.push_back({4,0});
+            Tetromino[2].Arr.push_back({8,0});
+            Tetromino[2].Arr.push_back({0,4});
+            Tetromino[2].Colour=FG_DARK_BLUE;
+            
+            Tetromino[3].Arr.push_back({4, 4});
+            Tetromino[3].Arr.push_back({8, 4});
+            Tetromino[3].Arr.push_back({12, 4});
+            Tetromino[3].Arr.push_back({12, 0});
+            Tetromino[3].Colour=FG_CYAN;
+            
+            Tetromino[4].Arr.push_back({8, 0});
+            Tetromino[4].Arr.push_back({8, 4});
+            Tetromino[4].Arr.push_back({12, 0});
+            Tetromino[4].Arr.push_back({12, 4});
+            Tetromino[4].Colour=FG_YELLOW;
+            
+            Tetromino[5].Arr.push_back({4, 4});
+            Tetromino[5].Arr.push_back({8, 4});
+            Tetromino[5].Arr.push_back({8, 0});
+            Tetromino[5].Arr.push_back({12, 0});
+            Tetromino[5].Colour=FG_GREEN;
+            
+            Tetromino[6].Arr.push_back({4, 0});
+            Tetromino[6].Arr.push_back({8, 0});
+            Tetromino[6].Arr.push_back({8, 4});
+            Tetromino[6].Arr.push_back({12, 4});
+            Tetromino[6].Colour=FG_RED;
+        }
+        
             for(int j=0;j<Tetromino[Tetromino_Type].Arr.size();j++){
-                Fill(Tetromino[Tetromino_Type].Arr[j].x,Tetromino[Tetromino_Type].Arr[j].y, Tetromino[Tetromino_Type].Arr[j].x1, Tetromino[Tetromino_Type].Arr[j].y1, PIXEL_SOLID, Tetromino[Tetromino_Type].Colour);
+                int x=Tetromino[Tetromino_Type].Arr[j].x+Pos_X;
+                int y=Tetromino[Tetromino_Type].Arr[j].y+Pos_Y;
+                int x1=x+Block_Size;
+                int y1=y+Block_Size;
+                short Colour=Tetromino[Tetromino_Type].Colour;
+                
+                Fill(x,y,x1,y1, PIXEL_SOLID, Colour);
             }
     }
     
     
     virtual bool OnUserCreate(){
-        
-        Tetromino.push_back({});
-        Tetromino.push_back({});
-        Tetromino.push_back({});
-        Tetromino.push_back({});
-        Tetromino.push_back({});
-        Tetromino.push_back({});
-        Tetromino.push_back({});
-        
-        
-        
-        Tetromino[0].Arr.push_back({8, 0});
-        Tetromino[0].Arr.push_back({8, 4});
-        Tetromino[0].Arr.push_back({12, 4});
-        Tetromino[0].Arr.push_back({8, 8});
-        Tetromino[0].Colour=FG_MAGENTA;
-        
-        Tetromino[1].Arr.push_back({0, 0});
-        Tetromino[1].Arr.push_back({4, 0});
-        Tetromino[1].Arr.push_back({8, 0});
-        Tetromino[1].Arr.push_back({12, 0});
-        Tetromino[1].Colour=FG_BLUE;
-        
-        Tetromino[2].Arr.push_back({0,0});
-        Tetromino[2].Arr.push_back({4,0});
-        Tetromino[2].Arr.push_back({8,0});
-        Tetromino[2].Arr.push_back({0,4});
-        Tetromino[2].Colour=FG_DARK_BLUE;
-        
-        Tetromino[3].Arr.push_back({4, 4});
-        Tetromino[3].Arr.push_back({8, 4});
-        Tetromino[3].Arr.push_back({12, 4});
-        Tetromino[3].Arr.push_back({12, 0});
-        Tetromino[3].Colour=FG_CYAN;
-        
-        Tetromino[4].Arr.push_back({8, 0});
-        Tetromino[4].Arr.push_back({8, 4});
-        Tetromino[4].Arr.push_back({12, 0});
-        Tetromino[4].Arr.push_back({12, 4});
-        Tetromino[4].Colour=FG_YELLOW;
-        
-        Tetromino[5].Arr.push_back({4, 4});
-        Tetromino[5].Arr.push_back({8, 4});
-        Tetromino[5].Arr.push_back({8, 0});
-        Tetromino[5].Arr.push_back({12, 0});
-        Tetromino[5].Colour=FG_GREEN;
-        
-        Tetromino[6].Arr.push_back({4, 0});
-        Tetromino[6].Arr.push_back({8, 0});
-        Tetromino[6].Arr.push_back({8, 4});
-        Tetromino[6].Arr.push_back({12, 4});
-        Tetromino[6].Colour=FG_RED;
         
         return true;
     }
@@ -169,7 +234,11 @@ public:
         
         DrawField();
         
+        if(Pos_X>(((ScreenWidth()-FieldWidth)/2)-2) and Pos_X+(3*Block_Size)<(((((ScreenWidth()-FieldWidth)/2)-2)+Block_Size)+FieldWidth-(2*Block_Size)) and Pos_Y+(Block_Size*4)<((((ScreenHeight()-FieldHeight)/2)-2)+FieldHeight)){
         Rotate_Tetromino();
+        }
+        
+        MoveTetromino();
         
         DrawTetromino();
         
