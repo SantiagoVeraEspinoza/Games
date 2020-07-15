@@ -684,26 +684,29 @@ public:
                 break;
                 
             case 10:
-                Speed=40;
+                Speed=30;
                 break;
                 
             case 20:
-                Speed=20;
+                Speed=25;
                 break;
             
             case 30:
-                Speed=15;
+                Speed=20;
                 break;
                 
             case 40:
-                Speed=10;
+                Speed=15;
                 break;
         }
     }
     
     
     virtual bool OnUserCreate(){
+        CreateAudio();
+        
         nSample = LoadAudioSample("/Users/santiagovera/Desktop/C++/Juegos/Tetris/Tetris/en.lproj/sfx_sounds_impact5.wav");
+        
         return true;
     }
     
@@ -744,6 +747,13 @@ public:
         
         cont++;
         cont_4++;
+        return true;
+    }
+    
+    virtual bool OnUserDestroy()
+    {
+        DestroyAudio();
+        
         return true;
     }
     
