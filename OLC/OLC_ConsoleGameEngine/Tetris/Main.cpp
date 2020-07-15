@@ -703,6 +703,7 @@ public:
     
     
     virtual bool OnUserCreate(){
+        nSample = LoadAudioSample("/Users/santiagovera/Desktop/C++/Juegos/Tetris/Tetris/en.lproj/sfx_sounds_impact5.wav");
         return true;
     }
     
