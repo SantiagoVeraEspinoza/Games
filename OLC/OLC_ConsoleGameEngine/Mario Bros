@@ -1,0 +1,202 @@
+//
+//  main.cpp
+//  MarioBros 1.2
+//
+//  Created by Santiago Vera on 28/08/20.
+//  Copyright © 2020 Mistic_Lion. All rights reserved.
+//
+
+#include <iostream>
+#include "olcConsoleGameEngineSDL.h"
+using namespace std;
+
+class Game : public olcConsoleGameEngine{
+    
+private:
+    float cont=0;
+    
+    float fPPosX=0;
+    float fPPosY=240-16;
+    
+    int nPlayerDirection=0;
+    
+    bool HasFliped=false;
+    
+    wstring MarioIdle;
+    
+public:
+    
+    Game(){
+        
+    }
+    
+    ~Game(){
+        
+    }
+    
+    void DrawSpriteFromString(wstring Sprite, int xPos, int yPos, int SpriteWidth=12, int SpriteHeight=16){
+        
+        for(int y=0; y<SpriteHeight; y++){
+            for(int x=0; x<SpriteWidth; x++){
+                int i=(y*SpriteWidth)+x;
+                
+                switch (Sprite[i]) {
+                    case '.':
+                        break;
+                        
+                    case 'r':
+                        Draw(x+xPos, y+yPos, FG_RED);
+                        break;
+                        
+                    case 'b':
+                        Draw(x+xPos, y+yPos, FG_BLUE);
+                        break;
+                        
+                    case 'c':
+                        Draw(x+xPos, y+yPos, FG_CYAN);
+                        break;
+                        
+                    case 'g':
+                        Draw(x+xPos, y+yPos, FG_GREEN);
+                        break;
+                        
+                    case 'w':
+                        Draw(x+xPos, y+yPos, FG_WHITE);
+                        break;
+                        
+                    case 'm':
+                        Draw(x+xPos, y+yPos, FG_MAGENTA);
+                        break;
+                        
+                    case 'p':
+                        Draw(x+xPos, y+yPos, FG_BLACK);
+                        break;
+                        
+                    case 'q':
+                        Draw(x+xPos, y+yPos, FG_GREY);
+                        break;
+                        
+                    case 'y':
+                        Draw(x+xPos, y+yPos, FG_YELLOW);
+                        break;
+                        
+                    case 'R':
+                        Draw(x+xPos, y+yPos, FG_DARK_RED);
+                        break;
+                        
+                    case 'B':
+                        Draw(x+xPos, y+yPos, FG_DARK_BLUE);
+                        break;
+                        
+                        
+                    case 'C':
+                        Draw(x+xPos, y+yPos, FG_DARK_CYAN);
+                        break;
+                        
+                    case 'G':
+                        Draw(x+xPos, y+yPos, FG_DARK_GREEN);
+                        break;
+                        
+                    case 'M':
+                        Draw(x+xPos, y+yPos, FG_DARK_MAGENTA);
+                        break;
+                        
+                    case 'Y':
+                        Draw(x+xPos, y+yPos, FG_DARK_YELLOW);
+                        break;
+                        
+                    default:
+                        break;
+                }
+                
+            }
+        }
+    }
+    
+    void MirrorString(wstring &Sprite, int SpriteWidth=12, int SpriteHeight=16){
+        for(int y=0; y<SpriteHeight; y++){
+            for(int x=0; x<SpriteWidth/2; x++){
+                int i=(y*SpriteWidth)+x;
+                int i2=(y*SpriteWidth)+(SpriteWidth-x-1);
+                
+                char Char1=Sprite[i];
+                char Char2=Sprite[i2];
+                
+                Sprite[i] = Char2;
+                Sprite[i2] = Char1;
+                
+            }
+        }
+        
+        if(HasFliped)HasFliped=false;
+        else if (!HasFliped) HasFliped=true;
+        
+    }
+    
+    virtual bool OnUserCreate(){
+        MarioIdle += L"...rrrrr....";
+        MarioIdle += L"..rrrrrrrrr.";
+        MarioIdle += L"..pppYYpY...";
+        MarioIdle += L".pYpYYYpYYY.";
+        MarioIdle += L".pYppYYYpYYY";
+        MarioIdle += L"..pYYYYpppp.";
+        MarioIdle += L"...YYYYYY...";
+        MarioIdle += L"..rrbrrbrr..";
+        MarioIdle += L".rrrbrrbrrr.";
+        MarioIdle += L"rrrrbbbbrrrr";
+        MarioIdle += L"YYrbybbybrYY";
+        MarioIdle += L"YYYbbbbbbYYY";
+        MarioIdle += L"YYbbbbbbbbYY";
+        MarioIdle += L"..bbb..bbb..";
+        MarioIdle += L".qqq....qqq.";
+        MarioIdle += L"qqqq....qqqq";
+        
+        return true;
+    }
+    
+    void MoveMario(){
+        if(GetKey(VK_D).bHeld){
+            fPPosX++;
+        }
+        else if(GetKey(VK_A).bHeld){
+            fPPosX--;
+        }
+    }
+    
+    void ManageSpriteRotation(){
+        
+        if(GetKey(VK_D).bPressed and HasFliped){
+            MirrorString(MarioIdle);
+        }
+        else if(GetKey(VK_A).bPressed and !HasFliped and !GetKey(VK_D).bHeld){
+            MirrorString(MarioIdle);
+        }
+        else if(GetKey(VK_A).bHeld and !HasFliped and GetKey(VK_D).bReleased){
+            MirrorString(MarioIdle);
+        }
+    }
+    
+    virtual bool OnUserUpdate(float fElapsedTime){
+        cont ++;
+        
+        Fill(0, 0, ScreenWidth(), ScreenHeight(), FG_WHITE);
+        
+        MoveMario();
+        
+        ManageSpriteRotation();
+        
+        DrawSpriteFromString(MarioIdle, fPPosX, fPPosY, 12, 16);
+        
+        return true;
+    }
+    
+};
+
+int main() {
+    
+    Game Juego;
+    if(Juego.ConstructConsole(256, 240, 4, 4)){
+        Juego.Start();
+    }
+    
+}
