@@ -207,6 +207,8 @@ public:
         Level_1.Level += L".................................";
         Level_1.Level += L".................................";
         Level_1.Level += L"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+        Level_1.WidthinTiles=33;
+        Level_1.HeightinTiles=15;
         
         //Block Objects
         
@@ -273,12 +275,12 @@ public:
         return true;
     }
     
-    void MoveMario(float Speed=1){
+    void MoveMario(float Speed=2){
         if(GetKey(VK_D).bHeld){
-            if(fPPosX<ScreenWidth()/2 or fCameraX>=((Level_1.WidthinTiles+1)*TileSize)){
+            if(fPPosX<ScreenWidth()/2 or fCameraX>=((Level_1.WidthinTiles)*TileSize)-ScreenWidth()){
                 if(fPPosX+MarioSprites[MarioSpriteType].SpriteWidth<ScreenWidth())fPPosX = fPPosX+Speed;
             }
-            if(fPPosX>=ScreenWidth()/2 and fCameraX<((Level_1.WidthinTiles+1)*TileSize)) fCameraX = fCameraX+Speed;
+            if(fPPosX>=ScreenWidth()/2 and fCameraX<((Level_1.WidthinTiles)*TileSize)-ScreenWidth()) fCameraX = fCameraX+Speed;
         }
         else if(GetKey(VK_A).bHeld){
             if(fPPosX>0 and fPPosX>ScreenWidth()/2)fPPosX = fPPosX-Speed;
@@ -299,7 +301,23 @@ public:
     }
     
     bool JumpFisics(){
-        if (GetKey(VK_SPACE).bHeld) return true;
+        for(int iy=0-TileSize; iy<VisibleTilesHigh*TileSize; iy++){
+            for(int ix=0-TileSize; ix<VisibleTilesLong*TileSize; ix++){
+                
+                int ID=((((int)(iy+fCameraY))/TileSize)*Level_1.WidthinTiles)+((ix+fCameraX)/TileSize);
+                
+                if(((ix+fCameraX)/TileSize)==(int)((ix+fCameraX)/TileSize) and ((iy+fCameraY)/16)==(int)((iy+fCameraY)/ 16)){
+                    switch (Level_1.Level[ID]) {
+                        case 'B':
+                            Draw(ix, iy, FG_YELLOW);
+                            break;
+                            
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
         
         return true;
     }
@@ -331,7 +349,7 @@ public:
         
         MoveMario();
         
-        DrawLevel(Level_1.Level, 33, 15);
+        DrawLevel(Level_1.Level, Level_1.WidthinTiles, Level_1.HeightinTiles);
         
         if(GetKey(VK_SPACE).bPressed) MarioSpriteType=1;
         
@@ -340,6 +358,10 @@ public:
         ManageGeneralRotation(bPlayerDirection, MarioSpriteType);
         
         DrawSpriteFromString(MarioSprites[MarioSpriteType].Sprite, fPPosX, fPPosY, MarioSprites[MarioSpriteType].SpriteWidth, MarioSprites[MarioSpriteType].SpriteHeight);
+        
+        Draw(fCameraX, fCameraY, FG_RED);
+        
+        JumpFisics();
         
         return true;
     }
