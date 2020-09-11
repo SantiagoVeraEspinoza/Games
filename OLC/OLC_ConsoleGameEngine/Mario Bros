@@ -15,14 +15,48 @@ class Game : public olcConsoleGameEngine{
 private:
     float cont=0;
     
+    int TileSize=16;
+    
+    int VisibleTilesLong=16;
+    int VisibleTilesHigh=15;
+    
     float fPPosX=0;
-    float fPPosY=240-16;
+    float fPPosY=240-TileSize*2;
     
-    int nPlayerDirection=0;
+    float fCameraX=fPPosX;
+    float fCameraY=0;
     
-    bool HasFliped=false;
+    bool bPlayerDirection=true;
     
-    wstring MarioIdle;
+    int MarioSpriteType=0;
+    
+    wstring TestSprite;
+    
+    struct PlayerSpriteObject{
+        bool HasFliped=false;
+        wstring Sprite;
+        int SpriteWidth;
+        int SpriteHeight;
+    };
+    
+    vector<PlayerSpriteObject> MarioSprites;
+    
+    struct LevelObj{
+        wstring Level;
+        int WidthinTiles=16;
+        int HeightinTiles=8;
+    };
+    
+    LevelObj Level_1;
+    
+    struct BlockObj{
+        wstring BlockSprite;
+        float PosX=0;
+        float PosY=0;
+    };
+    
+    vector<BlockObj> BlockSprites;
+    
     
 public:
     
@@ -113,7 +147,27 @@ public:
         }
     }
     
-    void MirrorString(wstring &Sprite, int SpriteWidth=12, int SpriteHeight=16){
+    void DrawLevel(wstring Level, int WidthinTiles, int HeightinTiles){
+        for(int iy=0-TileSize; iy<VisibleTilesHigh*TileSize; iy++){
+            for(int ix=0-TileSize; ix<VisibleTilesLong*TileSize; ix++){
+                
+                int ID=((((int)(iy+fCameraY))/TileSize)*WidthinTiles)+((ix+fCameraX)/TileSize);
+                
+                if(((ix+fCameraX)/TileSize)==(int)((ix+fCameraX)/TileSize) and ((iy+fCameraY)/16)==(int)((iy+fCameraY)/ 16)){
+                    switch (Level_1.Level[ID]) {
+                        case 'B':
+                            DrawSpriteFromString(BlockSprites[0].BlockSprite, ix, iy, 16, 16);
+                            break;
+                        
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+    }
+    
+    bool MirrorString(wstring &Sprite, bool &HasFliped, int SpriteWidth=12, int SpriteHeight=16){
         for(int y=0; y<SpriteHeight; y++){
             for(int x=0; x<SpriteWidth/2; x++){
                 int i=(y*SpriteWidth)+x;
@@ -131,49 +185,143 @@ public:
         if(HasFliped)HasFliped=false;
         else if (!HasFliped) HasFliped=true;
         
+        return true;
     }
     
     virtual bool OnUserCreate(){
-        MarioIdle += L"...rrrrr....";
-        MarioIdle += L"..rrrrrrrrr.";
-        MarioIdle += L"..pppYYpY...";
-        MarioIdle += L".pYpYYYpYYY.";
-        MarioIdle += L".pYppYYYpYYY";
-        MarioIdle += L"..pYYYYpppp.";
-        MarioIdle += L"...YYYYYY...";
-        MarioIdle += L"..rrbrrbrr..";
-        MarioIdle += L".rrrbrrbrrr.";
-        MarioIdle += L"rrrrbbbbrrrr";
-        MarioIdle += L"YYrbybbybrYY";
-        MarioIdle += L"YYYbbbbbbYYY";
-        MarioIdle += L"YYbbbbbbbbYY";
-        MarioIdle += L"..bbb..bbb..";
-        MarioIdle += L".qqq....qqq.";
-        MarioIdle += L"qqqq....qqqq";
+        
+        //Level Objects
+        
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L".................................";
+        Level_1.Level += L"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+        
+        //Block Objects
+        
+        TestSprite += L"RrrrrrrrrpRrrrrR";
+        TestSprite += L"rRRRRRRRRprRRRRp";
+        TestSprite += L"rRRRRRRRRprRRRRp";
+        TestSprite += L"rRRRRRRRRprRRRRp";
+        TestSprite += L"rRRRRRRRRprpRRRp";
+        TestSprite += L"rRRRRRRRRpRppppR";
+        TestSprite += L"rRRRRRRRRprrrrrp";
+        TestSprite += L"rRRRRRRRRprRRRRp";
+        TestSprite += L"rRRRRRRRRprRRRRp";
+        TestSprite += L"rRRRRRRRRprRRRRp";
+        TestSprite += L"ppRRRRRRprRRRRRp";
+        TestSprite += L"rrppRRRRprRRRRRp";
+        TestSprite += L"rRrrpppprRRRRRRp";
+        TestSprite += L"rRRRrrrprRRRRRRp";
+        TestSprite += L"rRRRRRRprRRRRRpp";
+        TestSprite += L"RppppppRrppppppR";
+        BlockSprites.push_back({TestSprite, 16, 16});
+        TestSprite.clear();
+        
+        //Player Objects
+        
+        TestSprite += L"...rrrrr....";
+        TestSprite += L"...rrrrr....";
+        TestSprite += L"..rrrrrrrrr.";
+        TestSprite += L"..pppYYpY...";
+        TestSprite += L".pYpYYYpYYY.";
+        TestSprite += L".pYppYYYpYYY";
+        TestSprite += L"..pYYYYpppp.";
+        TestSprite += L"...YYYYYY...";
+        TestSprite += L"..rrbrrbrr..";
+        TestSprite += L".rrrbrrbrrr.";
+        TestSprite += L"rrrrbbbbrrrr";
+        TestSprite += L"YYrbybbybrYY";
+        TestSprite += L"YYYbbbbbbYYY";
+        TestSprite += L"YYbbbbbbbbYY";
+        TestSprite += L"..bbb..bbb..";
+        TestSprite += L".qqq....qqq.";
+        TestSprite += L"qqqq....qqqq";
+        MarioSprites.push_back({false, TestSprite, 12, 16});
+        TestSprite.clear();
+        
+        TestSprite += L".............YYYY";
+        TestSprite += L"......rrrrrr.YYYY";
+        TestSprite += L".....rrrrrrrrrYYY";
+        TestSprite += L".....pppYYpYYRRRR";
+        TestSprite += L"....pYpYYYpYYRRRR";
+        TestSprite += L"....pYppYYYpYYYRR";
+        TestSprite += L"....ppYYYYpppppR.";
+        TestSprite += L"......YYYYYYYRR..";
+        TestSprite += L"..rrrrrbrrrbRR...";
+        TestSprite += L".rrrrrrrbrrrbb.qq";
+        TestSprite += L"YYrrrrrrbbbbbb.qq";
+        TestSprite += L"YYYYbbrbbybbybqqq";
+        TestSprite += L".YYqbbbbbbbbbbqqq";
+        TestSprite += L"..qqqbbbbbbbbbqqq";
+        TestSprite += L".qqqbbbbbbbb.....";
+        TestSprite += L".qq.bbbbb........";
+        MarioSprites.push_back({false, TestSprite, 17, 16});
+        TestSprite.clear();
         
         return true;
     }
     
-    void MoveMario(){
+    void MoveMario(float Speed=1){
         if(GetKey(VK_D).bHeld){
-            fPPosX++;
+            if(fPPosX<ScreenWidth()/2 or fCameraX>=((Level_1.WidthinTiles+1)*TileSize)){
+                if(fPPosX+MarioSprites[MarioSpriteType].SpriteWidth<ScreenWidth())fPPosX = fPPosX+Speed;
+            }
+            if(fPPosX>=ScreenWidth()/2 and fCameraX<((Level_1.WidthinTiles+1)*TileSize)) fCameraX = fCameraX+Speed;
         }
         else if(GetKey(VK_A).bHeld){
-            fPPosX--;
+            if(fPPosX>0 and fPPosX>ScreenWidth()/2)fPPosX = fPPosX-Speed;
+            if(fCameraX>0 and fPPosX<(ScreenWidth()/2)+1)fCameraX = fCameraX-Speed;
+        }
+        if(GetKey(VK_A).bHeld and fCameraX<=0 and fPPosX>0){
+            fPPosX = fPPosX-Speed;
+        }
+        
+        
+        
+        if(GetKey(VK_W).bHeld){
+            fCameraY++;
+        }
+        else if(GetKey(VK_S).bHeld){
+            fCameraY--;
         }
     }
     
-    void ManageSpriteRotation(){
+    bool JumpFisics(){
+        if (GetKey(VK_SPACE).bHeld) return true;
         
-        if(GetKey(VK_D).bPressed and HasFliped){
-            MirrorString(MarioIdle);
+        return true;
+    }
+    
+    void ManageSpriteRotation(int ID){
+        
+        if(GetKey(VK_D).bPressed){
+            bPlayerDirection=true;
         }
-        else if(GetKey(VK_A).bPressed and !HasFliped and !GetKey(VK_D).bHeld){
-            MirrorString(MarioIdle);
+        else if(GetKey(VK_A).bPressed and !GetKey(VK_D).bHeld){
+            bPlayerDirection=false;
         }
-        else if(GetKey(VK_A).bHeld and !HasFliped and GetKey(VK_D).bReleased){
-            MirrorString(MarioIdle);
+        else if(GetKey(VK_A).bHeld and GetKey(VK_D).bReleased){
+            bPlayerDirection=false;
         }
+        
+        
+    }
+    
+    void ManageGeneralRotation(bool GeneralRotation, int ID){
+        if(GeneralRotation and MarioSprites[ID].HasFliped) MirrorString(MarioSprites[ID].Sprite, MarioSprites[ID].HasFliped, MarioSprites[ID].SpriteWidth, MarioSprites[ID].SpriteHeight);
+        if(!GeneralRotation and !MarioSprites[ID].HasFliped) MirrorString(MarioSprites[ID].Sprite, MarioSprites[ID].HasFliped, MarioSprites[ID].SpriteWidth, MarioSprites[ID].SpriteHeight);
     }
     
     virtual bool OnUserUpdate(float fElapsedTime){
@@ -183,9 +331,15 @@ public:
         
         MoveMario();
         
-        ManageSpriteRotation();
+        DrawLevel(Level_1.Level, 33, 15);
         
-        DrawSpriteFromString(MarioIdle, fPPosX, fPPosY, 12, 16);
+        if(GetKey(VK_SPACE).bPressed) MarioSpriteType=1;
+        
+        ManageSpriteRotation(MarioSpriteType);
+        
+        ManageGeneralRotation(bPlayerDirection, MarioSpriteType);
+        
+        DrawSpriteFromString(MarioSprites[MarioSpriteType].Sprite, fPPosX, fPPosY, MarioSprites[MarioSpriteType].SpriteWidth, MarioSprites[MarioSpriteType].SpriteHeight);
         
         return true;
     }
