@@ -80,7 +80,7 @@ public:
         FillRect(AppleXY.x, AppleXY.y, SquareSize, SquareSize, olc::RED);
     }
 
-    void Snake(int lenght) {
+    void Snake() {
         cont++;
 
         Goes();
@@ -92,7 +92,7 @@ public:
             AppleXY.x = (int)((rand() % ScreenWidth() / 4) * 4);
             AppleXY.y = (int)((rand() % ScreenHeight() / 4) * 4);
 
-            for (int i = 0; i < lenght; i++) {
+            for (int i = 0; i < Snake_lenght; i++) {
                 Body.push_back({ x, y });
                 x = x - SquareSize;
             }
@@ -119,7 +119,7 @@ public:
 
             if (cont_2 >= 1) {
 
-                for (int i = lenght - 1; i > 0; i--) {
+                for (int i = Snake_lenght - 1; i > 0; i--) {
                     Body[i].x = Body[i - 1].x;
                     Body[i].y = Body[i - 1].y;
                 }
@@ -151,7 +151,7 @@ public:
                 
             }
             
-            for (int i = 1; i < lenght; i++) {
+            for (int i = 1; i < Snake_lenght; ++i) {
                 if (Body[0].x<(Body[i].x + SquareSize) and (Body[0].x + SquareSize)>Body[i].x) {
                     if (Body[0].y<(Body[i].y + SquareSize) and (Body[0].y + SquareSize)>Body[i].y) {
                         Body.clear();
@@ -181,11 +181,11 @@ public:
             else FillRect(int(Body[i].x), int(Body[i].y), SquareSize, SquareSize, olc::WHITE);
         }
 
-        if (lenght > templenght) {
+        if (Snake_lenght > templenght) {
             Body.push_back({ XY.x, XY.y });
         }
 
-        templenght = lenght;
+        templenght = Snake_lenght;
     }
     //----------------------------------------------------------------------------------------------------------
     virtual bool OnUserCreate() {
@@ -198,7 +198,7 @@ public:
 
         FillRect(0, 0, ScreenWidth(), ScreenHeight(), olc::BLACK);
 
-        Snake(Snake_lenght);
+        Snake();
 
         if (GetKey(olc::SPACE).bPressed) Snake_lenght++;
 
