@@ -14,6 +14,8 @@ class Game : public olcConsoleGameEngine{
     
 private:
     float cont=0;
+    int cont2=0;
+    int jumpcont=0;
     
     int TileSize=16;
     
@@ -21,7 +23,14 @@ private:
     int VisibleTilesHigh=15;
     
     float fPPosX=0;
-    float fPPosY=240-TileSize*2;
+    float fPPosY=(240-TileSize*2)-105;
+    float fVelX=2;
+    float fVelY=8;
+    float fAccelX=0.9;
+    float fAccelY=0.03;
+    
+    bool HasJumped=false;
+    bool HasJumped2=false;
     
     float fCameraX=fPPosX;
     float fCameraY=0;
@@ -51,8 +60,8 @@ private:
     
     struct BlockObj{
         wstring BlockSprite;
-        float PosX=0;
-        float PosY=0;
+        float SpriteWidth=0;
+        float SpriteHeight=0;
     };
     
     vector<BlockObj> BlockSprites;
@@ -199,13 +208,13 @@ public:
         Level_1.Level += L".................................";
         Level_1.Level += L".................................";
         Level_1.Level += L".................................";
-        Level_1.Level += L".................................";
-        Level_1.Level += L".................................";
-        Level_1.Level += L".................................";
-        Level_1.Level += L".................................";
-        Level_1.Level += L".................................";
-        Level_1.Level += L".................................";
-        Level_1.Level += L".................................";
+        Level_1.Level += L"....BBB................B....B....";
+        Level_1.Level += L"................B...........B....";
+        Level_1.Level += L"............................B....";
+        Level_1.Level += L"............................B....";
+        Level_1.Level += L"....B.........B.............B....";
+        Level_1.Level += L"....B.....B........B........B....";
+        Level_1.Level += L"....B.......................B....";
         Level_1.Level += L"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
         Level_1.WidthinTiles=33;
         Level_1.HeightinTiles=15;
@@ -275,32 +284,79 @@ public:
         return true;
     }
     
-    void MoveMario(float Speed=2){
+    bool MoveRight(float XSpeed=2, float YSpeed=8){
         if(GetKey(VK_D).bHeld){
             if(fPPosX<ScreenWidth()/2 or fCameraX>=((Level_1.WidthinTiles)*TileSize)-ScreenWidth()){
-                if(fPPosX+MarioSprites[MarioSpriteType].SpriteWidth<ScreenWidth())fPPosX = fPPosX+Speed;
+                if(fPPosX+MarioSprites[MarioSpriteType].SpriteWidth<ScreenWidth())fPPosX = fPPosX+XSpeed;
             }
-            if(fPPosX>=ScreenWidth()/2 and fCameraX<((Level_1.WidthinTiles)*TileSize)-ScreenWidth()) fCameraX = fCameraX+Speed;
+            if(fPPosX>=ScreenWidth()/2 and fCameraX<((Level_1.WidthinTiles)*TileSize)-ScreenWidth()) fCameraX = fCameraX+XSpeed;
         }
-        else if(GetKey(VK_A).bHeld){
-            if(fPPosX>0 and fPPosX>ScreenWidth()/2)fPPosX = fPPosX-Speed;
-            if(fCameraX>0 and fPPosX<(ScreenWidth()/2)+1)fCameraX = fCameraX-Speed;
-        }
-        if(GetKey(VK_A).bHeld and fCameraX<=0 and fPPosX>0){
-            fPPosX = fPPosX-Speed;
-        }
-        
-        
-        
-        if(GetKey(VK_W).bHeld){
-            fCameraY++;
-        }
-        else if(GetKey(VK_S).bHeld){
-            fCameraY--;
-        }
+        return true;
     }
     
-    bool JumpFisics(){
+    bool MoveLeft(float XSpeed=2, float YSpeed=8){
+        if(GetKey(VK_A).bHeld){
+            if(fPPosX>0 and fPPosX>ScreenWidth()/2)fPPosX = fPPosX-XSpeed;
+            if(fCameraX>0 and fPPosX<(ScreenWidth()/2)+1)fCameraX = fCameraX-XSpeed;
+        }
+        if(GetKey(VK_A).bHeld and fCameraX<=0 and fPPosX>0){
+            fPPosX = fPPosX-XSpeed;
+        }
+        return true;
+    }
+    
+    void MoveMario(float XSpeed=2, float YSpeed=8){
+        if(GetKey(VK_W).bHeld){
+            fPPosY++;
+        }
+        if(GetKey(VK_SPACE).bPressed and ColisionFall()){
+            HasJumped=true;
+            HasJumped2=true;
+        }
+        if(HasJumped){
+            if(!ColisionFall() or jumpcont<5) ControlJumpSpeed();
+            if(ColisionFall() and jumpcont>=5){
+                fVelY=8;
+                HasJumped=false;
+                jumpcont=0;
+            }
+        }
+        
+        //if(!ColisionLine(-1, 1)){
+          //  MoveRight();
+       // }
+       // MoveLeft();
+        
+        if (!ColisionMoveRight()) MoveRight();
+        MoveLeft();
+        
+        
+        //if(ColisionLine(-1, -TileSize)) cout<<"Colisiona Derecha";
+        
+        //while(ColisionLine(-1)) fPPosX--;
+        //while(ColisionLine(-1, -(TileSize-2))) fPPosX++;
+        //while(ColisionFall(-(TileSize-2))){
+           // fPPosY++;
+           // HasJumped=false;
+           // HasJumped2=false;
+        //}
+    }
+    
+    bool ColisionDetection(float fPPosX, float fPPosY, int nTx, int nTy, int ID){
+        if(fPPosY+16>nTy and fPPosY<=nTy+1){
+            if (fPPosX<nTx+12 and fPPosX+12>nTx+1) return true;
+        }
+        return false;
+    }
+    
+    bool ColisionRight(float fPPosX, float fPPosY, int nTx, int nTy, int ID){
+        if(fPPosY+16>nTy and fPPosY<nTy+16){
+            if (fPPosX<nTx and fPPosX+12>=nTx-1) return true;
+        }
+        return false;
+    }
+    
+    bool ColisionFall(int yVariation=0, int xVariation=0){
         for(int iy=0-TileSize; iy<VisibleTilesHigh*TileSize; iy++){
             for(int ix=0-TileSize; ix<VisibleTilesLong*TileSize; ix++){
                 
@@ -309,7 +365,10 @@ public:
                 if(((ix+fCameraX)/TileSize)==(int)((ix+fCameraX)/TileSize) and ((iy+fCameraY)/16)==(int)((iy+fCameraY)/ 16)){
                     switch (Level_1.Level[ID]) {
                         case 'B':
-                            Draw(ix, iy, FG_YELLOW);
+                            if(ColisionDetection(fPPosX, fPPosY, ix, iy, 0)){
+                                Draw(ix, iy, FG_YELLOW);
+                                return true;
+                            }
                             break;
                             
                         default:
@@ -318,6 +377,67 @@ public:
                 }
             }
         }
+        
+        return false;
+    }
+    
+    bool ColisionMoveRight(int yVariation=0, int xVariation=0){
+        for(int iy=0-TileSize; iy<VisibleTilesHigh*TileSize; iy++){
+            for(int ix=0-TileSize; ix<VisibleTilesLong*TileSize; ix++){
+                
+                int ID=((((int)(iy+fCameraY))/TileSize)*Level_1.WidthinTiles)+((ix+fCameraX)/TileSize);
+                
+                if(((ix+fCameraX)/TileSize)==(int)((ix+fCameraX)/TileSize) and ((iy+fCameraY)/16)==(int)((iy+fCameraY)/ 16)){
+                    switch (Level_1.Level[ID]) {
+                        case 'B':
+                            if(ColisionRight(fPPosX, fPPosY, ix, iy, 0)){
+                                Draw(ix, iy, FG_GREEN);
+                                return true;
+                            }
+                            break;
+                            
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    void Fall(float Speed=3){
+        for(int i=0; i<Speed; i++){
+        if(!ColisionFall()){
+            fPPosY ++;
+            if(HasJumped)MarioSpriteType=1;
+        }
+        else if(ColisionFall()){
+            MarioSpriteType=0;
+            HasJumped2=false;
+            HasJumped=false;
+            fVelY=8;
+            jumpcont=0;
+        }
+        }
+    }
+    
+    bool ControlJumpSpeed(){
+        jumpcont++;
+        
+        fVelY -= fVelY*fAccelY;
+        
+        if(fVelY<=0.1) fVelY=0;
+        
+        if(jumpcont<=10) fPPosY -= fVelY;
+        
+        if(HasJumped2 and jumpcont>10){
+            if(GetKey(VK_SPACE).bHeld){
+                fPPosY -= fVelY;
+            }
+        }
+        
+        if(GetKey(VK_SPACE).bReleased) HasJumped2=false;
         
         return true;
     }
@@ -351,8 +471,6 @@ public:
         
         DrawLevel(Level_1.Level, Level_1.WidthinTiles, Level_1.HeightinTiles);
         
-        if(GetKey(VK_SPACE).bPressed) MarioSpriteType=1;
-        
         ManageSpriteRotation(MarioSpriteType);
         
         ManageGeneralRotation(bPlayerDirection, MarioSpriteType);
@@ -361,7 +479,7 @@ public:
         
         Draw(fCameraX, fCameraY, FG_RED);
         
-        JumpFisics();
+        Fall();
         
         return true;
     }
