@@ -361,7 +361,7 @@ public:
             }
         }
         
-        if(GetKey(VK_LEFT).bPressed and DoesPieceFit2() and DoesPieceFitLeft()){
+        else if(GetKey(VK_LEFT).bPressed and DoesPieceFit2() and DoesPieceFitLeft()){
             Pos_X=Pos_X-4;
         }
         
@@ -374,7 +374,7 @@ public:
             }
         }
         
-        if(GetKey(VK_DOWN).bPressed and DoesPieceFit3() and DoesPieceFitDown()){
+        else if(GetKey(VK_DOWN).bPressed and DoesPieceFit3() and DoesPieceFitDown()){
             Pos_Y=Pos_Y+4;
         }
         
@@ -385,6 +385,13 @@ public:
                 Pos_Y=Pos_Y+4;
                 User_Flag=0;
             }
+        }
+        
+        else if(GetKey(VK_UP).bPressed){
+            while(DoesPieceFit3() and DoesPieceFitDown()){
+                Pos_Y=Pos_Y+4;
+            }
+            cont_3=120;
         }
     }
     
@@ -703,16 +710,15 @@ public:
     
     
     virtual bool OnUserCreate(){
-        CreateAudio();
+        CreateAudio(44100, 2, 8, 512);
         
-        nSample = LoadAudioSample("/Users/santiagovera/Desktop/C++/Juegos/Tetris/Tetris/en.lproj/sfx_sounds_impact5.wav");
-        
+        //nSample = LoadAudioSample("/Users/santiagovera/Desktop/C++/Juegos/Tetris/Tetris/en.lproj/sfx_sounds_impact5.wav");
         return true;
     }
     
     virtual bool OnUserUpdate(float fElapsedTime){
-        PlaySample(nSample);
         
+        //PlaySample(nSample);
         
         Fill(0, 0, ScreenWidth(), ScreenHeight(), PIXEL_SOLID, FG_BLACK);
         
@@ -753,7 +759,6 @@ public:
     virtual bool OnUserDestroy()
     {
         DestroyAudio();
-        
         return true;
     }
     
