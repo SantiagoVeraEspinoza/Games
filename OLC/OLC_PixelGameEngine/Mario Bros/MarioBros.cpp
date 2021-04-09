@@ -424,24 +424,26 @@ public:
         return true;
     }
 
-    bool MoveSide(float &XSpeed, float &YSpeed, float &MaxXSpeed) {
-        float Accel = 3;
+    bool MoveSide(float &XSpeed, float &YSpeed, float &MaxXSpeed, float Accel) {
         //cout << XSpeed << endl;
         if (GetKey(olc::D).bHeld or RightDPad or StickRight) {
-            XSpeed += Accel * GetElapsedTime();
-            if (XSpeed >= MaxXSpeed * GetElapsedTime() * 10) XSpeed = MaxXSpeed * GetElapsedTime() * 10;
+            XSpeed += Accel * GetElapsedTime();            
         }
 
         else if (GetKey(olc::A).bHeld or LeftDPad or StickLeft) {
             XSpeed += -Accel * GetElapsedTime();
-            if (XSpeed <= -MaxXSpeed * GetElapsedTime() * 10) XSpeed = -MaxXSpeed * GetElapsedTime() * 10;
         }
         else {
-            XSpeed -= Accel * GetElapsedTime() * XSpeed * 0.5;
-            if (XSpeed < 0.1 and XSpeed > -0.1) XSpeed = 0;
+            XSpeed -= Accel * GetElapsedTime() * XSpeed * 1;
+            if (XSpeed < 0.01 and XSpeed > -0.01) XSpeed = 0;
         }
 
-        if (PlayerIsOnGround) XSpeed -= Accel * GetElapsedTime() * XSpeed * 1;
+        if (PlayerIsOnGround) XSpeed -= 3 * GetElapsedTime() * XSpeed * 2;
+
+        if (XSpeed >= MaxXSpeed * GetElapsedTime() * 10) XSpeed = MaxXSpeed * GetElapsedTime() * 10;
+        else if (XSpeed <= -MaxXSpeed * GetElapsedTime() * 10) XSpeed = -MaxXSpeed * GetElapsedTime() * 10;
+
+        //cout << XSpeed << MaxSideSpeed << endl;
 
         float LimitSpeed = 0.7;
         if (XSpeed >= LimitSpeed or XSpeed <= -LimitSpeed) MaxJumpSpeed = 2.1;
@@ -557,15 +559,17 @@ public:
         }
 
         if (GetKey(olc::SHIFT).bHeld or ButtonX or ButtonY) {
-            MaxSideSpeed = 60;
+            MaxSideSpeed = 20;
             AnimVel = 5;
+            fAccelX = 6;
         }
-        else{
-            MaxSideSpeed = 30;
+        else if (!GetKey(olc::SHIFT).bHeld or !ButtonX or !ButtonY){
+            MaxSideSpeed = 10;
             AnimVel = 15;
+            fAccelX = 4;
         }
 
-        MoveSide(fVelX, fVelY, MaxSideSpeed);
+        MoveSide(fVelX, fVelY, MaxSideSpeed, fAccelX);
     }
 
     //ColisionDetection(fPPosX, fPPosY, MarioSprites[MarioSpriteType].SpriteWidth, MarioSprites[MarioSpriteType].SpriteHeight
