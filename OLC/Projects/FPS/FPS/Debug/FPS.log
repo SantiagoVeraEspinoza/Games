@@ -1,0 +1,5 @@
+﻿  FPS.cpp
+C:\Users\santi\OneDrive\Escritorio\C++ Juegos\Juegos\OLC_PixelGameEngine\FPS\FPS\FPS.cpp(29,16): warning C4305: 'inicializando': truncamiento de 'double' a 'float'
+C:\Users\santi\OneDrive\Escritorio\C++ Juegos\Juegos\OLC_PixelGameEngine\FPS\FPS\FPS.cpp(111,26): warning C4244: 'inicializando': conversión de 'float' a 'int'; posible pérdida de datos
+C:\Users\santi\OneDrive\Escritorio\C++ Juegos\Juegos\OLC_PixelGameEngine\FPS\FPS\FPS.cpp(187,89): warning C4244: 'argumento': conversión de 'double' a 'DWORD'; posible pérdida de datos
+  FPS.vcxproj -> C:\Users\santi\OneDrive\Escritorio\C++ Juegos\Juegos\OLC_PixelGameEngine\FPS\Debug\FPS.exe
